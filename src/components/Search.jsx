@@ -12,93 +12,94 @@ class Search extends Component {
     this.state = {
       query: '',
       results: [],
+      lineage: []
     }
     this.handleInputChange = this.handleInputChange.bind(this);
     this.getInfoById = this.getInfoById.bind(this);
     this.getInfoByName = this.getInfoByName.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.findLineage = this.findLineage.bind(this);
+    this.getInfoByIdRecurse = this.getInfoByIdRecurse.bind(this);
   }
 
-  
-  getInfoById(){
+
+  getInfoById() {
     axios.get(`${API_URL}/${this.state.query}`)
-    .then(res => {
-      this.setState({
-      results: res.data
-      });
-      console.log('id', this.state.results)
-    })
+      .then(res => {
+        this.setState({
+          results: res.data
+        })
+        console.log('id', this.state.results)
+      })
   }
 
-  getInfoByName(){
+  getInfoByName() {
     axios.post(`${API_URL}_search`, {
       query: this.state.query
     })
-    .then(res => {
-      this.setState({
-        results: res.data
-      });
-      console.log('name', this.state.results)
-    })
-  }
-
-  findLineage(x){
-    console.log('recursion');
-    while (x !== "1") {
-      this.setState({
-        query: x
-      }, () => {
-        this.getInfoById();
-        x = this.state.results.parent;
-        console.log('new parent id', x)
+      .then(res => {
+        this.setState({
+          results: res.data
+        });
       })
-    }
   }
 
-  handleClick(e){
+  getInfoByIdRecurse(id) {
+    axios.get(`${API_URL}/${id}`)
+      .then(res => {
+        //get copy of current lineage
+        const lineage = [...this.state.lineage];
+        lineage.push(<p>{`${res.data.name}(${res.data.rank}) `}</p>);
+        if (res.data.parent === "1") lineage.push("root");
+        this.setState({ lineage }, () => {
+          if (res.data.parent !== "1") this.getInfoByIdRecurse(res.data.parent);
+        });
+        console.log('lineage', this.state.lineage)
+      })
+  }
+
+
+  handleClick(e) {
     const target = e.target.id;
     console.log('target id', target);
     //first make this ID the query string 
-    this.setState({
-      query: target
-    }, () => {
-      console.log('results parent', this.state.results.parent)
-      this.findLineage(this.state.results.parent);
-    })
-}
+    this.setState({query: target, lineage: []})
+    this.getInfoByIdRecurse(target);
+  }
 
-  handleInputChange(event){
+  handleInputChange(event) {
     this.setState({
       query: event.target.value
     }, () => {
-      if (this.state.query){
+      if (this.state.query) {
         //check if numerical (i.e. id)
-        if(/^[0-9]+$/.test(this.state.query)) {
+        if (/^[0-9]+$/.test(this.state.query)) {
           this.getInfoById();
         }
         //if name, need to make post request to API
-        if(/^[a-zA-Z\s]*$/.test(this.state.query)) {
+        if (/^[a-zA-Z\s]*$/.test(this.state.query)) {
           this.getInfoByName();
         }
-
-    }})
+      }
+    })
   }
+
 
   render() {
     return (
       <div>
         <form>
-         <input
+          <input
             placeholder="Type your search here"
-           onChange={this.handleInputChange}
+            onChange={this.handleInputChange}
           />
-         <Suggestions results={this.state.results} handleClick={this.handleClick}/>
+          <Suggestions className="list" results={this.state.results} handleClick={this.handleClick} />
         </form>
-        {/* <Lineage /> */}
+        <Lineage lineage={this.state.lineage} results={this.state.results} className="lineage"/>
       </div>
     )
   }
 }
 
 export default Search;
+
+

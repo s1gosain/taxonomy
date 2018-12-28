@@ -1,0 +1,14 @@
+.lineage {
+  position: relative;
+  border: 2px red;
+  float: right;
+  width: 50%;
+  height: 200px; 
+}
+
+.list {
+  float: left;
+  width: 50%;
+  border: 2px navy;
+  height: 500px;
+}

@@ -7,18 +7,19 @@ const Suggestions = (props) => {
   if (Array.isArray(props.results.results)) {
      const items = props.results.results.map(x => (
       <ul key={x.name}>
-        <a key={x.id} id={x.id} href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${x.id}`} target="_blank" onClick={props.handleClick}>
+        {/* <a key={x.id} id={x.id} href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${x.id}`} target="_blank" onClick={props.handleClick}> */}
+        <a key={x.id} id={x.id} target="_blank" onClick={props.handleClick}>
            {x.name}
         </a>
       </ul>
+      )
      )
-     )
-  return <ul>{items}</ul>
+  return <ul className="list">{items}</ul>
   }
   //by Id returns an object, so just return the name property
   else {
   return <ul>
-    <a onClick={props.handleClick} id={props.results.id} href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${props.results.id}`} target="_blank">{props.results.name}</a>
+    <a className="list" onClick={props.handleClick} id={props.results.id}>{props.results.name}</a>
     </ul>
   }
 }
